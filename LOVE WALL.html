@@ -119,55 +119,55 @@
     </style>
 </head>
 <script type="module">
-    // Import Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
+        // 🔥 Your Firebase Config (Replace with your own)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBb7dQevLH0tBTFOgWFb43EE16bZ5z0Iqg",
+    authDomain: "love-wall-57e61.firebaseapp.com",
+    databaseURL: "https://love-wall-57e61-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "love-wall-57e61",
+    storageBucket: "love-wall-57e61.firebasestorage.app",
+    messagingSenderId: "251265554028",
+    appId: "1:251265554028:web:1a4dde213d1d16069e2a49",
+    measurementId: "G-PJM1F3NFZM"
+        };
 
-    // 🔥 Your Firebase Config (Replace with your own)
-const firebaseConfig = {
-  apiKey: "AIzaSyBb7dQevLH0tBTFOgWFb43EE16bZ5z0Iqg",
-  authDomain: "love-wall-57e61.firebaseapp.com",
-  databaseURL: "https://love-wall-57e61-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "love-wall-57e61",
-  storageBucket: "love-wall-57e61.firebasestorage.app",
-  messagingSenderId: "251265554028",
-  appId: "1:251265554028:web:1a4dde213d1d16069e2a49",
-  measurementId: "G-PJM1F3NFZM"
-};
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-    // 📝 Add a New Note
-    function addNote() {
-        let noteText = document.getElementById('note-input').value;
-        if (noteText.trim() === '') {
-            alert('Write something sweet first!');
-            return;
+        // Reference to the notes in the database
+        const notesRef = ref(database, 'notes');
+
+        // Function to add a note to the database
+        function addNote() {
+            let noteText = document.getElementById('note-input').value;
+            if (noteText.trim() === '') {
+                alert('Write something sweet first!');
+                return;
+            }
+            push(notesRef, {
+                text: noteText,
+                timestamp: Date.now()
+            });
+            document.getElementById('note-input').value = '';
         }
 
-        // Save to Firebase
-        push(ref(database, "notes"), { text: noteText });
-
-        document.getElementById('note-input').value = '';
-    }
-
-    // 👀 Display Notes in Real-Time
-    function displayNotes() {
-        const notesContainer = document.getElementById('notes-container');
-        onValue(ref(database, "notes"), (snapshot) => {
-            notesContainer.innerHTML = '';
-            snapshot.forEach(childSnapshot => {
-                let note = document.createElement('div');
-                note.className = 'note';
-                note.innerText = childSnapshot.val().text;
-                notesContainer.appendChild(note);
+        // Listen for new notes added to the database
+        onValue(notesRef, (snapshot) => {
+            const notesContainer = document.getElementById('notes-container');
+            notesContainer.innerHTML = ''; // Clear existing notes
+            snapshot.forEach((childSnapshot) => {
+                const note = childSnapshot.val();
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note';
+                noteElement.innerText = note.text;
+                notesContainer.appendChild(noteElement);
             });
         });
-    }
 
-    // Load notes when the page loads
-    document.addEventListener('DOMContentLoaded', displayNotes);
 </script>
 <body>
     
@@ -190,7 +190,8 @@ const firebaseConfig = {
             }
             let notes = JSON.parse(localStorage.getItem('notes')) || [];
             notes.push(noteText);
-           
+            localStorage.setItem('notes', JSON.stringify(notes));
+            displayNotes();
             document.getElementById('note-input').value = '';
         }
         
