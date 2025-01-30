@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Notes Wall 💌</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+        body {
+            font-family: 'Indie Flower', cursive;
+            text-align: center;
+            background-color: #c6dbff;
+            margin: 0;
+            padding: 20px;
+            background-image: url('https://www.transparenttextures.com/patterns/sketchy.png');
+        }
+        h1 {
+            color: #ecaee7;
+            font-size: 2.5em;
+        }
+        h1 img {
+            width: 50px;
+            height: 50px;
+        }
+        
+        #notes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .note {
+            background: #f5ece1;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.1);
+            max-width: 180px;
+            font-size: 1.2em;
+            position: relative;
+            display: inline-block;
+            text-align: left;
+            min-height: 100px;
+            padding-top: 30px;
+        }
+        .note::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 20px;
+            background-color: #ff99b4;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 3px;
+        }
+        textarea {
+            width: 80%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 2px dashed #f8bae5;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-family: 'Indie Flower', cursive;
+            background-color: #fff0f5;
+        }
+        button {
+            background-color: #ff69b4;
+            color: white;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 1.2em;
+            font-family: 'Indie Flower', cursive;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background-color: #571838;
+        }
+        #secret-button {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.2);
+        }
+        #secret-button:hover {
+            background-color: #d63384;
+        }
+        #secret-message {
+            display: none;
+            position: fixed;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: #ff1493;
+            font-weight: bold;
+            z-index: 1001;
+        }
+        #secret-image {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // 🔥 Your Firebase Config (Replace with your own)
+    const firebaseConfig = {
+        apiKey: "IzaSyBb7dQevLH0tBTFOgWFb43EE16bZ5z0Iqg",
+        authDomain: "love-wall-57e61.firebaseapp.com",
+        databaseURL: "https://love-wall-57e61-default-rtdb.europe-west1.firebasedatabase.app/",
+        projectId: "love-wall-57e61",
+        storageBucket: "love-wall-57e61.firebasestorage.app",
+        messagingSenderId: "251265554028",
+        appId: "1:251265554028:web:1a4dde213d1d16069e2a49"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // 📝 Add a New Note
+    function addNote() {
+        let noteText = document.getElementById('note-input').value;
+        if (noteText.trim() === '') {
+            alert('Write something sweet first!');
+            return;
+        }
+
+        // Save to Firebase
+        push(ref(database, "notes"), { text: noteText });
+
+        document.getElementById('note-input').value = '';
+    }
+
+    // 👀 Display Notes in Real-Time
+    function displayNotes() {
+        const notesContainer = document.getElementById('notes-container');
+        onValue(ref(database, "notes"), (snapshot) => {
+            notesContainer.innerHTML = '';
+            snapshot.forEach(childSnapshot => {
+                let note = document.createElement('div');
+                note.className = 'note';
+                note.innerText = childSnapshot.val().text;
+                notesContainer.appendChild(note);
+            });
+        });
+    }
+
+    // Load notes when the page loads
+    document.addEventListener('DOMContentLoaded', displayNotes);
+</script>
+<body>
+    
+    <h1> Love Notes Wall  </h1>
+    
+    <textarea id="note-input" placeholder="Write a cute note..."></textarea><br>
+    <button onclick="addNote()">Add Note</button>
+    <div id="notes-container"></div>
+    
+    <button id="secret-button" onclick="revealSecret()">🐸</button>
+    <div id="secret-message">Mwah! </div>
+    <img id="secret-image" src="https://i.pinimg.com/736x/74/80/4b/74804b09a7eb78b87929e5646943bed4.jpg" alt="Secret Image">
+    
+    <script>
+        function addNote() {
+            let noteText = document.getElementById('note-input').value;
+            if (noteText.trim() === '') {
+                alert('Write something sweet first!');
+                return;
+            }
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.push(noteText);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            displayNotes();
+            document.getElementById('note-input').value = '';
+        }
+        
+        function displayNotes() {
+            let notesContainer = document.getElementById('notes-container');
+            notesContainer.innerHTML = '';
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.forEach(noteText => {
+                let note = document.createElement('div');
+                note.className = 'note';
+                note.innerText = noteText;
+                notesContainer.appendChild(note);
+            });
+        }
+        
+        function revealSecret() {
+            let secretMessage = document.getElementById('secret-message');
+            let secretImage = document.getElementById('secret-image');
+            secretMessage.style.display = 'block';
+            secretImage.style.display = 'block';
+            setTimeout(() => {
+                secretMessage.style.display = 'none';
+                secretImage.style.display = 'none';
+            }, 3000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', displayNotes);
+    </script>
+</body>
+</html>
